@@ -2,14 +2,13 @@ import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
-  Text,
   View,
   TextInput,
   Button,
-  FlatList,
-  Image,
   ActivityIndicator,
 } from "react-native";
+import MealTable from "./MealTable";
+import { fetchRecipes } from "./Api";
 
 export default function App() {
   const [keyword, setKeyword] = useState("");
@@ -21,15 +20,7 @@ export default function App() {
     setLoading(true); // Set loading state to true before fetch
     setRecipes([]);
 
-    fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${keyword}`)
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(
-            `Error in fetch: status code ${response.status} ${response.statusText}`
-          );
-
-        return response.json();
-      })
+    fetchRecipes(keyword)
       .then((data) => setRecipes(data.meals))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false)); // Set loading state to false
@@ -50,17 +41,7 @@ export default function App() {
       {/* Display ActivityIndicator when loading is true */}
       {loading && <ActivityIndicator size="large" />}
 
-      <FlatList
-        data={recipes}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View>
-            <Text style={styles.text}>{item.strMeal}</Text>
-            <Image source={{ uri: item.strMealThumb }} style={styles.image} />
-          </View>
-        )}
-        ItemSeparatorComponent={<View style={styles.separator}></View>}
-      />
+      <MealTable recipes={recipes}></MealTable>
     </View>
   );
 }

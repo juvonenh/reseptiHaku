@@ -8,13 +8,19 @@ import {
   Button,
   FlatList,
   Image,
+  ActivityIndicator,
 } from "react-native";
 
 export default function App() {
   const [keyword, setKeyword] = useState("");
   const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  // Async
   const handleFetch = () => {
+    setLoading(true); // Set loading state to true before fetch
+    setRecipes([]);
+
     fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${keyword}`)
       .then((response) => {
         if (!response.ok)
@@ -25,7 +31,8 @@ export default function App() {
         return response.json();
       })
       .then((data) => setRecipes(data.meals))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false)); // Set loading state to false
   };
 
   return (
@@ -39,6 +46,9 @@ export default function App() {
         />
         <Button title="FIND" onPress={handleFetch} />
       </View>
+
+      {/* Display ActivityIndicator when loading is true */}
+      {loading && <ActivityIndicator size="large" />}
 
       <FlatList
         data={recipes}
